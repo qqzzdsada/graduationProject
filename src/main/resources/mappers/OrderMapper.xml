@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="gd.mall.dao.OrderDao">
+
+    <resultMap id="OrderMap" type="Order">
+        <id column="order_id" property="orderId" />
+        <result column="order_title" property="orderTitle" />
+        <result column="order_no" property="orderNo" />
+        <result column="user_id" property="userId" />
+        <result column="commodity_id" property="commodityId" />
+        <result column="order_fee" property="orderFee" />
+        <result column="order_status" property="orderStatus" />
+        <result column="order_ctime" property="orderCtime" />
+        <result column="order_utime" property="orderUtime" />
+    </resultMap>
+
+    <insert id="insertOrder" parameterType="Order">
+        insert into orders(order_title,order_no,user_id,commodity_id,order_fee,order_status,order_ctime,order_utime)
+        values (#{orderTitle},#{orderNo},#{userId},#{commodityId},#{orderFee},'0',now(),#{orderUtime})
+    </insert>
+
+    <select id="findNoPayOrder" resultMap="OrderMap">
+        select order_title,order_no,user_id,commodity_id,order_fee,order_status,order_ctime,order_utime
+        from orders
+        where user_id=#{userId} and commodity_id=#{commodityId} and order_status='0'
+    </select>
+
+    <select id="findOrderByOrderNo" resultMap="OrderMap">
+        select order_title,order_no,user_id,commodity_id,order_fee,order_status,order_ctime,order_utime
+        from orders
+        where order_no=#{orderNo}
+    </select>
+
+    <update id="updateOrderStatus" >
+        update orders
+        set order_status =#{orderStatus}
+        where order_no =#{orderNo}
+    </update>
+
+    <select id="findNoPayOrderByDuration" resultMap="OrderMap">
+        select order_title,order_no,user_id,commodity_id,order_fee,order_status,order_ctime,order_utime
+        from orders
+        where order_status = '0' and order_ctime &lt;= #{instant}
+    </select>
+
+</mapper>

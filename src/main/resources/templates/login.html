@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" style="height:100%">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <!-- 引入 layui.css -->
+    <link rel="stylesheet" href="layui/css/layui.css">
+
+    <!-- 引入 layui.js -->
+    <script src="layui/layui.js"></script>
+</head>
+<body style="height: 100%">
+<!--设置高度自适应屏幕-->
+<div style="height: 25%"></div>
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md6 layui-col-md-offset3">
+            <form class="layui-form" >
+                <h1>登录</h1> <br/>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">账号</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="userCode" required  lay-verify="required" placeholder="请输入账号" autocomplete="off" class="layui-input" style="width: 270px">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">密码</label>
+                    <div class="layui-input-inline">
+                        <input type="password" name="userPwd" required  lay-verify="required"  placeholder="请输入密码" autocomplete="off" class="layui-input" style="width: 270px">
+                    </div>
+                </div><br/>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="formSubmit">登录</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <br/>
+    <div class="layui-row">
+        <div class="layui-col-md-offset4">
+            <a href="toregister"><span style="color: blue">没有账号？去注册一个</span></a>
+        </div>
+    </div>
+</div>
+
+<script>
+    layui.use(['form','layer'], function(){
+        var form = layui.form;
+        var layer =layui.layer;
+        //监听提交
+        form.on('submit(formSubmit)', function(data){
+            $.ajax({
+                type:'post',
+                data:{
+                    userCode:data.field.userCode,
+                    userPwd:data.field.userPwd
+                },
+                dataType:'json',
+                url:'dologin',
+                success:function (data) {
+                    console.log(data);
+                    if(data.status==1)
+                        self.location='toindex';
+                    else{
+                        layer.alert("账号或密码不正确");
+                        $(" input[ type='text' ] ").val("");
+                        $(" input[ type='password' ] ").val("");
+                    }
+                }
+            })
+            //取消form提交的默认行为
+            return false;
+        });
+    });
+</script>
+</body>
+</html>
+

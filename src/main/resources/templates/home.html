@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>个人主页</title>
+    <link rel="stylesheet" href="css/font.css">
+    <link rel="stylesheet" href="css/xadmin.css">
+    <script src="layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="js/xadmin.js"></script>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <style type="text/css">
+        .layui-container{
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+<script>
+    var userNickname=null;
+    var userAvatar="";
+    var userId=null;
+    var pictures=new Array();
+
+    $(function () {
+        $.ajax({
+            url:"loginInfo",
+            method:"get",
+            async:false,
+            success: function(data){
+                if(data.user!=null)
+                {
+                    userNickname=data.user.userNickname;
+                    userAvatar=data.user.userAvatar;
+                    userId=data.user.userId;
+                    //页面渲染
+                    $("#theUser").html("<a><span>"+userNickname+"</span></a>");
+                    $("#theUser2").attr("src","images/"+userAvatar);
+                    $("#userImg").attr("src","images/"+userAvatar);
+                    $("#userName").html(userNickname);
+                }
+            }
+        })
+    });
+</script>
+<ul class="layui-nav" style="text-align: right;">
+    <li class="layui-nav-item" style="float: left">
+        <a href="toindex"><span>首页</span></a>
+    </li>
+    <li class="layui-nav-item" >
+        <a href="tosell"><span>发售物品</span></a>
+    </li>
+    <li class="layui-nav-item" id="theUser">
+        <a><span>用户名</span></a>
+    </li>
+    <li class="layui-nav-item" >
+        <a href="toregister">
+            <img id="theUser2" src="" class="layui-nav-img">
+        </a>
+        <dl class="layui-nav-child">
+            <dd><a href="tohome">个人主页</a></dd>
+            <dd><a href="toMymessage">我的消息</a></dd>
+            <dd><a href="loginout">退出登录</a></dd>
+        </dl>
+    </li>
+</ul>
+
+<div class="layui-container">
+    <div class="layui-row layui-col-space20">
+        <div class="layui-col-md3">
+            <div style="width: 100%;height: 240px;text-align: center;background-color: pink">
+            <img id="userImg" src="images/default.jpg" style="width: 110px;height: 110px;border-radius: 50%;margin:50px auto 30px auto;">
+                <h2 id="userName"></h2>
+            </div><hr>
+            <div class="layui-panel">
+                <ul class="layui-menu" id="nav-bar">
+                    <li lay-options="{req:'userinfo'}">
+                        <div class="layui-menu-body-title">个人资料</div>
+                    </li><li class="layui-menu-item-divider"></li>
+                    <li lay-options="{req:'mycommodity'}">
+                        <div class="layui-menu-body-title">我发布的</div>
+                    </li><li class="layui-menu-item-divider"></li>
+                    <li lay-options="{req:'myfavorite'}">
+                        <div class="layui-menu-body-title">我的收藏</div>
+                    </li><li class="layui-menu-item-divider"></li>
+                </ul>
+            </div>
+    </div>
+        <div class="layui-col-md9">
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <iframe src="" id="show" frameborder="0" scrolling="yes" class="x-iframe" width="100%" height="600px"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use('dropdown', function(){
+        var dropdown = layui.dropdown;
+        //菜单点击事件，其中 docDemoMenu1 对应的是菜单结构上的 id 指
+        dropdown.on('click(nav-bar)', function(options){
+            console.log(options.req);
+            $('#show').attr('src',options.req);
+        });
+    });
+</script>
+</body>
+</html>

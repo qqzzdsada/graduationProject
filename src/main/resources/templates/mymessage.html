@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" style="height: 100%">
+<head>
+    <meta charset="UTF-8">
+    <title>我的消息</title>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <!-- 引入 layui.css -->
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <!-- 引入 layui.js -->
+    <script src="layui/layui.js"></script>
+    <style type="text/css">
+        .imgdiv{
+            float:left;
+
+        }
+        .imgcss {
+            width:50px;
+            height:50px;
+            border-radius: 50%;
+            margin-left: 12px;
+            margin-bottom: 10px;
+        }
+        .user_name {
+            margin-left:10px;
+            color:#3D9EEA;
+            font-size:15px;
+            font-weight: bolder;
+        }
+        .message_content{
+            margin-top:10px;
+            font-size:16px;
+            margin-left:70px;
+        }
+    </style>
+</head>
+<body style="height: 100%">
+<script>
+    var userNickname=null;
+    var userAvatar="";
+    var userId=null;
+
+    $(function () {
+        $.ajax({
+            url:"loginInfo",
+            method:"get",
+            async:false,
+            success: function(data){
+                if(data.user!=null)
+                {
+                    userNickname=data.user.userNickname;
+                    userAvatar=data.user.userAvatar;
+                    userId=data.user.userId;
+                    $("#theUser").html("<a><span>"+userNickname+"</span></a>");
+                    $("#theUser2").attr("src","images/"+userAvatar);
+                }
+            }
+        })
+
+        $.ajax({
+            url:"myMessage",
+            async:false,
+            data:{
+                userNickname:userNickname
+            },
+            dataType:'json',
+            success: function(data){
+                var dataStr="";
+                for(const index in data)
+                {
+                    dataStr=dataStr+'<a href="toChat?sellerId='+data[index].userId+'">\n' +
+                        '<div class="user">\n' +
+                        '<div class="imgdiv"><img src="images/'+data[index].userAvatar+'" class="imgcss"/></div>\n' +
+                        '<div class="conmment_details">\n' +
+                        '<span class="user_name">'+data[index].userNickname+'</span>\n' +
+                        '</div>\n' +
+                        '<hr>\n' +
+                        '</div></a>';
+                }
+                $('#userList').html(dataStr);
+            }
+        })
+    });
+</script>
+<ul class="layui-nav" style="text-align: right;">
+    <li class="layui-nav-item" style="float: left">
+        <a href="toindex"><span>首页</span></a>
+    </li>
+    <li class="layui-nav-item" >
+        <a href="tosell"><span>发售物品</span></a>
+    </li>
+    <li class="layui-nav-item" id="theUser">
+        <a><span>用户名</span></a>
+    </li>
+    <li class="layui-nav-item" >
+        <a href="toregister">
+            <img id="theUser2" src="" class="layui-nav-img">
+        </a>
+        <dl class="layui-nav-child">
+            <dd><a href="tohome;">个人主页</a></dd>
+            <dd><a href='toMymessage'>我的消息</a></dd>
+            <dd><a href="loginout">退出登录</a></dd>
+        </dl>
+    </li>
+</ul>
+<div style="height: 10%"></div>
+    <div class="layui-container">
+        <div class="layui-row">
+            <div class="layui-col-md10 layui-col-md-offset1">
+                <h2>最近联系</h2><hr>
+                <div class="layui-panel">
+                    <ul class="layui-menu" id="userList">
+<!--                        <a href="#">-->
+<!--                            <div class="user">-->
+<!--                            <div class="imgdiv"><img src="images/头像2.jpg" class="imgcss"/></div>-->
+<!--                            <div class="conmment_details">-->
+<!--                                <span class="user_name">小刚</span>-->
+<!--                                <div class="message_content" >  感觉林丹越来越帅了，好棒</div>-->
+<!--                            </div>-->
+<!--                            <hr>-->
+<!--                        </div></a>-->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <meta charset="UTF-8">
+    <title>个人资料</title>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <!-- 引入 layui.css -->
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <!-- 引入 layui.js -->
+    <script src="layui/layui.js"></script>
+</head>
+<body>
+<h3 style="margin-left: 20px;"><strong>个人资料</strong></h3>
+<hr class="layui-border-cyan">
+<div class="layui-container">
+<form class="layui-form" style="margin-top: 50px;"> <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
+    <div class="layui-form-item">
+        <label class="layui-form-label"><h3>昵称:</h3></label>
+            <label class="layui-form-label">小明</label>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label"><h3>用户名:</h3></label>
+        <label class="layui-form-label">zzz</label>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label"><h3>密码:</h3></label>
+        <div class="layui-input-block"><button style="margin-left: 30px" class="layui-btn layui-btn-danger">修改密码</button></div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label"><h3>头像:</h3></label>
+        <div class="layui-input-inline">
+            <img src="images/default.jpg" style="width: 150px;height: 150px;border-radius: 50%;margin-left: 15px;">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button style="margin-left: 30px" class="layui-btn layui-btn-lg layui-btn-radius layui-btn-warm">更换头像</button>
+        </div>
+    </div>
+
+</form>
+</div>
+<script>
+
+</script>
+</body>
+</html>

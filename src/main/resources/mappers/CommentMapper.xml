@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="gd.mall.dao.CommentDao">
+
+    <resultMap id="CommentMap" type="Comment">
+        <id column="comment_id" property="commentId" />
+        <result column="user_id" property="userId" />
+        <result column="user_nickname" property="userNickname" />
+        <result column="user_avatar" property="userAvatar" />
+        <result column="commodity_id" property="commodityId" />
+        <result column="comment_content" property="commentContent" />
+        <result column="comment_time" property="commentTime" />
+        <result column="comment_like" property="commentLike" />
+        <result column="parent_id" property="parentId" />
+    </resultMap>
+
+    <select id="findCommentBycommodityId" resultMap="CommentMap">
+        select comment_id,user_id,user_nickname,user_avatar,commodity_id,comment_content,comment_time,comment_like,parent_id from comment
+        where commodity_id=#{commodityId}
+    </select>
+
+    <insert id="insertComment" parameterType="Comment">
+        insert into comment(user_id,user_nickname,user_avatar,commodity_id,comment_content,comment_time,comment_like,parent_id)
+        values (#{userId},#{userNickname},#{userAvatar},#{commodityId},#{commentContent},#{commentTime},0,0)
+    </insert>
+
+</mapper>

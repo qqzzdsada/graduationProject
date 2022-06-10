@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" style="height: 100%">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <link rel="stylesheet" href="css/index.css">
+    <!-- 引入 layui.css -->
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <!-- 引入 layui.js -->
+    <script src="layui/layui.js"></script>
+</head>
+<body style="height: 100%">
+<script>
+    var userNickname=null;
+    var userAvatar=null;
+
+    $(function () {
+        //判断用户是否登录
+        $.ajax({
+            url:"loginInfo",
+            method:"get",
+            async:false,
+            success: function(data){
+                if(data.user!=null)
+                {
+                    userNickname=data.user.userNickname;
+                    userAvatar=data.user.userAvatar;
+                    $("#theUser").html("<a><span>"+userNickname+"</span></a>");
+                    $("#theUser2").html("<a href='#'> <img src='images/"+userAvatar+"' class='layui-nav-img'> </a> " +
+                        "<dl class='layui-nav-child'> <dd><a href='tohome'>个人主页</a></dd> <dd><a href='toMymessage'>我的消息</a></dd> <dd><a href='loginout'>退出登录</a></dd> </dl>");
+                }
+            }
+        })
+        //搜索所有物品,进行页面渲染
+        $.ajax({
+            url:'findcommodities',
+            method:"get",
+            async:false,
+            dataType:'json',
+            success: function(data) {
+                var dataStr="";
+                for (const index in data) {
+                    dataStr=dataStr+"<li class=\"layui-col-md3\"><a href=\"tocommoditydetail?commodityId="+data[index].commodityId+"\"><img class=\"commodityPicture\" src=\"images/"+ data[index].commodityPicture +"\"><p class=\"commodityDesc\" >"+ data[index].commodityDesc +"</p><h2 class=\"commodityPrice\" >￥"+ data[index].commodityPrice+"</h2><p class=\"sellerNickname\" >"+data[index].sellerNickname+"</p></a></li>";
+                }
+                $('#content').html(dataStr);
+            }
+        })
+
+    });
+
+    function tosell()
+    {
+        if(userNickname==null)
+        {
+            layer.confirm('请先登录！', {icon: 9, title:'提示'}, function(index){
+                //do something
+                self.location='tologin';
+                layer.close(index);
+            });
+        }
+        else
+            self.location='tosell';
+    }
+
+    function toFind(){
+        var keyword=$('#box').val();
+        if(keyword==''||keyword==null)
+            return false;
+        //清空页面
+        $('#content').html('');
+        $.ajax({
+            url:'findSomecommodity',
+            data:{
+                keyword
+            },
+            async:false,
+            dataType: 'json',
+            success: function (data){
+                //渲染
+                var commodityStr='';
+                for(const index in data)
+                {
+                    commodityStr=commodityStr+'<li class="layui-col-md3">\n' +
+                        '            <a href="tocommoditydetail?commodityId='+ data[index].commodityId+'">\n' +
+                        '                <img class="commodityPicture" src="images/'+data[index].commodityPicture+'">\n' +
+                        '                <p class="commodityDesc" >'+data[index].commodityDesc+'</p>\n' +
+                        '                <h2 class="commodityPrice" >￥'+ data[index].commodityPrice+'</h2>\n' +
+                        '                <p class="sellerNickname" >'+ data[index].sellerNickname+'</p>\n' +
+                        '            </a>\n' +
+                        '        </li>';
+                }
+                $('#content').html(commodityStr);
+            }
+
+        })
+    }
+
+</script>
+<ul class="layui-nav" style="text-align: right;">
+    <li class="layui-nav-item" style="float: left">
+        <a href="toindex"><span>首页</span></a>
+    </li>
+    <li class="layui-nav-item">
+        <a href="javascript:tosell()"><span>发售物品</span></a>
+    </li>
+    <li class="layui-nav-item" id="theUser">
+        <a href="tologin"><span >登录</span></a>
+    </li>
+    <li class="layui-nav-item" id="theUser2">
+        <a href="toregister" >
+            <span>注册</span>
+        </a>
+    </li>
+</ul>
+<br/>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <div class="layui-col-md-offset4 layui-col-md5">
+            <div class="layui-input-inline">
+                <input id="box" type="text" placeholder="搜索你想要的物品" class="layui-input" style="width: 500px;height:50px;border-color:red">
+            </div>
+            <a class="layui-btn layui-btn-warm" style="height: 50px" href="javascript:toFind();"><i class="layui-icon layui-icon-search" style="font-size:30px"></i>搜索</a>
+        </div>
+    </div>
+</div><br/><br/><br/><br/>
+<div class="layui-container">
+    <ul class="layui-row" id="content">
+<!--        <li class="layui-col-md3">-->
+<!--            <a href="#">-->
+<!--                <img class="commodityPicture" src="">-->
+<!--                <p class="commodityDesc" >C语言程序设计</p>-->
+<!--                <h2 class="commodityPrice" >￥32</h2>-->
+<!--                <p class="sellerNickname" >小明</p>-->
+<!--            </a>-->
+<!--        </li>-->
+    </ul>
+</div>
+
+</body>
+</html>

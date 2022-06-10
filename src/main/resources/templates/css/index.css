@@ -1,0 +1,26 @@
+
+.sellerNickname{
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.commodityDesc{
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 5px
+}
+
+.commodityPrice{
+    text-align: center;
+    margin-bottom: 5px;
+    color:red;
+}
+
+.commodityPicture{
+    height: 240px;
+    margin-bottom: 20px
+}

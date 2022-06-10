@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>聊天区</title>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <link rel="stylesheet" href="css/chat.css">
+    <!-- 引入 layui.css -->
+    <link rel="stylesheet" href="layui/css/layui.css">
+</head>
+<body>
+<script>
+
+    var toName;
+    var userNickName;
+    function tosend()
+    {
+        //获取数据接收方头像
+        var avatar =$('#toImg').attr('value');
+        var toId =$('#toId').attr('value');
+        //获取输入框中输入的内容
+        var mes=$('#message').val();
+        //判空
+        if(mes==''||mes==null)
+            return false;
+        //获取当前时间
+        var now=CurrentTime();
+        //发送完消息清空输入框
+        $('#message').val('');
+        //页面渲染
+        var content="<div class=\"message my_message\"><p>"+mes+"<br><span>"+now+"</span></p></div>";
+        $('.chatBox').append(content);
+        //数据封装
+        var json = {"toName":toName,"messageContent":mes,"sendTime":now,"toAvatar":avatar,"toId":toId};
+        //将消息发送到服务端
+        ws.send(JSON.stringify(json));
+    }
+
+    function getNow(Mytime) { return Mytime < 10 ? '0' + Mytime : Mytime; }
+
+    function CurrentTime() {
+        var myDate = new Date();
+        //获取当前年份
+        var year = myDate.getFullYear();
+        //获取当前月份
+        var month = myDate.getMonth() + 1;
+        //获取当前日期
+        var date = myDate.getDate();
+        //获取当前小时数(0-23)
+        var h = myDate.getHours();
+        //获取当前分钟数(0-59)
+        var m = myDate.getMinutes();
+        // var s = myDate.getSeconds();
+        var now = year + '-' + getNow(month) + "-" + getNow(date) + " " + getNow(h) + ':' + getNow(m);
+        return now;
+    }
+
+    $(function (){
+
+        ws=new WebSocket("ws://localhost:8080/mall/chat");
+
+        ws.onopen = function (){
+
+        }
+
+        //接收到服务端推送的消息后触发
+        ws.onmessage = function (evt){
+            //获取服务端推送过来的消息
+            var dataStr=evt.data;
+            //将dataStr转换为json对象
+            var res=JSON.parse(dataStr);
+            //页面渲染,判断数据的发送方是否为正在聊天的用户
+            if(toName==res.fromName)
+            {
+                var content="<div class=\"message frnd_message\"><p>"+res.messageContent+"<br><span>"+res.sendTime+"</span></p></div>";
+                $('.chatBox').append(content);
+            }
+        }
+
+        ws.onclose = function (){
+        }
+
+        toName = $('#to').attr('value');
+
+        //显示历史数据
+        $.ajax({
+            url:'findMessage',
+            type:'post',
+            data:{
+                toName:toName
+            },
+            dataType:'json',
+            async:false,
+            success:function(data){
+                //页面渲染
+                var mesStr = '';
+                for(const index in data)
+                {
+                    if(data[index].toName==toName)
+                        mesStr=mesStr+'<div class="message my_message">';
+                    else
+                        mesStr=mesStr+'<div class="message frnd_message">';
+                    mesStr=mesStr+'<p>'+data[index].messageContent+'<br><span>'+data[index].sendTime+'</span></p></div>';
+                }
+                $('.chatBox').html(mesStr);
+            }
+        })
+    })
+</script>
+
+<div class="container">
+    <div class="rightSide">
+        <div class="header">
+            <div class="imgText">
+                <div class="userimg">
+<!--                    设置一个隐藏域记录数据接收方的头像-->
+                    <div id="toId" th:value="${seller.userId}" style="display: none"></div>
+                    <div id="toImg" th:value="${seller.userAvatar}" style="display: none"></div>
+                    <img th:src="'images/'+${seller.userAvatar}" class="cover">
+                </div>
+                <h3 th:text="${seller.userNickname}"></h3>
+                <div id="to" th:value="${seller.userNickname}" style="display: none"></div>
+            </div>
+        </div>
+        <div class="chatBox">
+<!--            <div class="message my_message">-->
+<!--                <p>你好<br><span>2022-03-21 12:15</span></p>-->
+<!--            </div>-->
+<!--            <div class="message frnd_message">-->
+<!--                <p>Hi<br><span>12:15</span></p>-->
+<!--            </div>-->
+        </div>
+        <div class="chatbox_input">
+            <input id="message" type="text">
+            <a href="javascript:tosend()" type="button" class="layui-btn layui-btn-lg layui-btn-radius layui-btn-normal" >发送</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

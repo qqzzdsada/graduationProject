@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="gd.mall.dao.MessageDao">
+
+    <resultMap id="MessageMap" type="Message">
+        <id column="message_id" property="messageId" />
+        <result column="from_id" property="fromId" />
+        <result column="from_name" property="fromName" />
+        <result column="from_avatar" property="fromAvatar" />
+        <result column="to_id" property="toId" />
+        <result column="to_name" property="toName" />
+        <result column="to_avatar" property="toAvatar" />
+        <result column="message_content" property="messageContent" />
+        <result column="send_time" property="sendTime"/>
+    </resultMap>
+
+    <insert id="insertMessage" parameterType="Message">
+        insert into message(from_id,from_name,from_avatar,to_id,to_name,to_avatar,message_content,send_time)
+        values (#{fromId},#{fromName},#{fromAvatar},#{toId},#{toName},#{toAvatar},#{messageContent},#{sendTime})
+    </insert>
+
+    <select id="findMessage" resultMap="MessageMap">
+        select from_name,to_name,message_content,send_time from
+            (select from_name,to_name,message_content,send_time from message
+             where from_name=#{fromName} and to_name=#{toName}
+             union all
+             select from_name,to_name,message_content,send_time from message
+             where from_name=#{toName} and to_name=#{fromName}) t
+        order by send_time
+    </select>
+
+    <select id="findMessageByuserNickname" resultMap="MessageMap">
+        select distinct from_id,from_name,from_avatar,to_id,to_name,to_avatar from message
+        where from_name=#{userNickname} or to_name=#{userNickname}
+    </select>
+
+
+</mapper>

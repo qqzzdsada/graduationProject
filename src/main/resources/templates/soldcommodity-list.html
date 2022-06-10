@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>已售物品管理</title>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <!-- 引入 layui.css -->
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <!-- 引入 layui.js -->
+    <script src="layui/layui.js"></script>
+    <style type="text/css">
+        .layui-table-cell {
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+<table id="commodityList"></table>
+
+<script>
+    layui.use('table', function(){
+        var table = layui.table;
+
+        $.ajax({
+            url:'findCommodityByStatus?status=0',
+            dataType:'json',
+            type:'get',
+            success :function (res){
+                if(res){
+                    var str={
+                        elem: '#commodityList'
+                        ,page: true //开启分页
+                        ,limit:2
+                        ,limits:[2,4,8]
+                        ,even:true
+                        ,cols:
+                            [
+                                [ //表头
+                                    {field: 'commodityId', title: '物品ID', sort: true}
+                                    ,{field: 'commodityDesc', title: '物品简介'}
+                                    ,{field: 'commodityLoss', title: '物品损耗情况',templet:function (d){
+                                        if(d.commodityLoss=='0')
+                                            return "全新";
+                                        if(d.commodityLoss=='1')
+                                            return "几乎全新";
+                                        if(d.commodityLoss=='2')
+                                            return "轻微使用痕迹";
+                                        return "明显使用痕迹";
+                                    }}
+                                    ,{field: 'commodityPrice', title: '物品价格'}
+                                    ,{field: 'commodityStatus', title: '物品状态',templet:function (d){
+                                        if(d.commodityStatus=='1')
+                                            return "在售";
+                                        if(d.commodityStatus=='0')
+                                            return "已售出";
+                                        return "已下架";
+                                    }}
+                                    ,{field: 'sellerNickname', title: '卖家名称'}
+                                    ,{title: '物品图片',templet: function(d){
+                                        return '<img src="images/'+d.commodityPicture+'" style="width: 60px;height: 60px">';
+                                    }
+                                },{title:"操作",width:"15.5%",align:"center",templet:function(d){
+                                        var str="<button type='button' class='layui-btn layui-btn-sm layui-btn-danger' lay-event='del'>删除</button>";
+                                        str+="<button type='button' class='layui-btn layui-btn-sm layui-btn-warm' lay-event='edit'>更新</button>";
+                                        return str;
+                                    }}
+                                ]
+                            ]
+                    };
+                    str.data=res.data;
+                    table.render(str);
+                }
+                else
+                    layer.msg("获取数据失败");
+
+            }
+        })
+
+    });
+</script>
+
+</body>
+</html>

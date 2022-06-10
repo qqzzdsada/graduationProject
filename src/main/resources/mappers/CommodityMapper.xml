@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="gd.mall.dao.CommodityDao">
+    <resultMap id="CommodityMap" type="Commodity">
+        <id column="commodity_id" property="commodityId" />
+        <result column="commodity_desc" property="commodityDesc" />
+        <result column="commodity_loss" property="commodityLoss" />
+        <result column="commodity_price" property="commodityPrice" />
+        <result column="commodity_status" property="commodityStatus" />
+        <result column="seller_id" property="sellerId" />
+        <result column="buyer_id" property="buyerId" />
+        <result column="seller_nickname" property="sellerNickname" />
+        <result column="commodity_picture" property="commodityPicture" />
+    </resultMap>
+
+    <insert id="insertCommodity" parameterType="Commodity">
+        insert into commodity(commodity_desc,commodity_loss,commodity_price,commodity_status,seller_id,seller_nickname,commodity_picture)
+        values (#{commodityDesc},#{commodityLoss},#{commodityPrice},#{commodityStatus},#{sellerId},#{sellerNickname},#{commodityPicture})
+    </insert>
+
+    <select id="findCommodityById" resultMap="CommodityMap">
+        select commodity_id,commodity_desc,commodity_loss,commodity_price,commodity_status,seller_id,seller_nickname,commodity_picture from commodity
+        where commodity_id=#{commodityId}
+    </select>
+
+    <select id="findcommodities" resultMap="CommodityMap">
+        select commodity_id,commodity_desc,commodity_loss,commodity_price,commodity_status,seller_id,seller_nickname,commodity_picture from commodity
+        where commodity_status='1'
+    </select>
+
+    <select id="findCommodityByStatus" resultMap="CommodityMap">
+        select commodity_id,commodity_desc,commodity_loss,commodity_price,commodity_status,seller_id,seller_nickname,commodity_picture from commodity
+        where commodity_status=#{commodityStatus}
+    </select>
+
+    <select id="findmyCommodity" resultMap="CommodityMap">
+        select commodity_desc,commodity_loss,commodity_price,commodity_status,commodity_picture from commodity
+        where commodity_status='1' and seller_id=#{userId};
+    </select>
+
+    <select id="findmyFavorite" resultMap="CommodityMap">
+        select commodity_desc,commodity_loss,commodity_price,commodity_status,seller_nickname,commodity_picture  from
+        (select commodity_id from favorite
+         where user_id=#{userId}) t
+         left join commodity
+         on commodity.commodity_id=t.commodity_id
+    </select>
+
+    <select id="findSomecommodity" parameterType="java.lang.String" resultMap="CommodityMap">
+        select commodity_id,commodity_desc,commodity_loss,commodity_price,commodity_status,seller_id,seller_nickname,commodity_picture from commodity
+        where commodity_status='1' and commodity_desc like concat('%',#{keyword},'%')
+    </select>
+
+    <update id="updateCommodity">
+        update commodity
+        <set>
+            <if test="commodityDesc!=null"> commodity_desc=#{commodityDesc},</if>
+            <if test="commodityLoss!=null"> commodity_loss=#{commodityLoss},</if>
+            <if test="commodityPrice!=null"> commodity_price=#{commodityPrice},</if>
+            <if test="commodityStatus!=null"> commodity_status=#{commodityStatus},</if>
+            <if test="sellerId!=null"> seller_id=#{sellerId},</if>
+            <if test="buyerId!=null"> buyer_id=#{buyerId},</if>
+            <if test="sellerNickname!=null"> seller_nickname=#{sellerNickname},</if>
+            <if test="commodityPicture!=null"> commodity_picture=#{commodityPicture}</if>
+        </set>
+        where commodity_id=#{commodityId}
+    </update>
+
+</mapper>

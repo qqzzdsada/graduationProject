@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" style="height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <title>商品详情页</title>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <link rel="stylesheet" href="css/comment.css">
+    <!-- 引入 layui.css -->
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <!-- 引入 layui.js -->
+    <script src="layui/layui.js"></script>
+</head>
+<body style="height: 100%;">
+<script>
+    var userId=null;
+    var userNickname=null;
+    var userAvatar=null;
+
+    $(function () {
+        $.ajax({
+            url:"loginInfo",
+            type:"get",
+            async:false,
+            success: function(data){
+                if(data.user!=null)
+                {
+                    userNickname=data.user.userNickname;
+                    userAvatar=data.user.userAvatar;
+                    userId=data.user.userId;
+                    //页面渲染
+                    $("#theUser").html("<a><span>"+userNickname+"</span></a>");
+                    $("#theUser2").html("<a href='#'> <img src='images/"+userAvatar+"' class='layui-nav-img'> </a> " +
+                        "<dl class='layui-nav-child'> <dd><a href='tohome'>个人主页</a></dd> <dd><a href='toMymessage'>我的消息</a></dd><dd><a href='loginout'>退出登录</a></dd> </dl>");
+                    $("#userImg").attr('src','images/'+userAvatar);
+
+                    //判断此物品是否被当前用户收藏
+                    $.ajax({
+                        url:'favoriteInfo',
+                        data:{
+                            userId:userId,
+                            commodityId:$('#commodity').attr('value')
+                        },
+                        async:false,
+                        dataType:'json',
+                        success:function (data){
+                            if(data.status==1)
+                            {
+                                //如果用户已收藏,页面渲染
+                                $("#favorite").toggle();
+                                $("#nfavorite").toggle();
+                            }
+                        }
+                    })
+                }
+            }
+        });
+        //页面渲染，显示评论
+        $.ajax({
+            url:"findCommentBycommodityId",
+            async:false,
+            data:{
+                commodityId:$('#commodity').attr('value')
+            },
+            dataType:'json',
+            success: function(data){
+                //页面渲染
+                var len=data.length;
+                var dataStr='';
+                for(const index in data)
+                {
+                    var cnt = data[index].commentLike;
+                    if(len==index+1)
+                        dataStr=dataStr+'<div class="comment comment-bottom">\n';
+                    else
+                        dataStr=dataStr+'<div class="comment">\n';
+                    dataStr=dataStr+ '<span class="comment-avatar">\n' +
+                        '                <img src="images/'+data[index].userAvatar+'" alt="avatar">\n' +
+                        '            </span>\n' +
+                        '                <div class="comment-content">\n' +
+                        '                    <p class="comment-content-name">'+data[index].userNickname+'</p>\n' +
+                        '                    <p class="comment-content-article">'+data[index].commentContent+'</p>\n' +
+                        '                    <p class="comment-content-footer">\n' +
+                        '                        <span style="display: none" class="comment-content-footer-id">#2</span>\n' +
+                        '                        <span class="comment-content-footer-timestamp">'+data[index].commentTime+'</span>\n';
+                    if(cnt>0)
+                        dataStr=dataStr+'<a href="#" class="layui-icon-praise layui-icon" style="font-size: 12px;"><span>&nbsp'+cnt+'</span></a>\n';
+                    else
+                        dataStr=dataStr+'<a href="#" class="layui-icon-praise layui-icon" style="font-size: 12px;"><span></span></a>\n';
+                    dataStr=dataStr+'</p>\n' +
+                        '                </div>\n' +
+                        '                <div class="cls"></div>\n' +
+                        '            </div>';
+                }
+                $('#commentList').html(dataStr);
+            }
+        });
+
+    });
+
+    function getNow(Mytime) { return Mytime < 10 ? '0' + Mytime : Mytime; }
+
+    function CurrentTime() {
+        var myDate = new Date();
+        //获取当前年份
+        var year = myDate.getFullYear();
+        //获取当前月份
+        var month = myDate.getMonth() + 1;
+        //获取当前日期
+        var date = myDate.getDate();
+        //获取当前小时数(0-23)
+        var h = myDate.getHours();
+        //获取当前分钟数(0-59)
+        var m = myDate.getMinutes();
+        // var s = myDate.getSeconds();
+        var now = year + '-' + getNow(month) + "-" + getNow(date) + " " + getNow(h) + ':' + getNow(m);
+        return now;
+    }
+
+    function toSell()
+    {
+        if(userNickname==null)
+        {
+            layer.confirm('请先登录！', {icon: 9, title:'提示'}, function(index){
+                self.location='tologin';
+                layer.close(index);
+            });
+        }
+        else
+            self.location='tosell';
+    }
+
+    function collect()
+    {
+        if(userNickname==null)
+        {
+            layer.confirm('请先登录！', {icon: 9, title:'提示'}, function(index){
+                self.location='tologin';
+                layer.close(index);
+            });
+        }
+        else
+        {
+            var commodityId=$('#commodity').attr('value');
+            $.ajax({
+                url:'collect',
+                data:{
+                    userId:userId,
+                    commodityId:commodityId
+                },
+                dataType:'json',
+                type: 'post',
+                success:function (data) {
+                    if (data.status == 1)
+                        layer.msg("收藏成功");
+                }
+            })
+        }
+    }
+
+    function toChat()
+    {
+        if(userNickname==null)
+        {
+            layer.confirm('请先登录！', {icon: 9, title:'提示'}, function(index){
+                //do something
+                self.location='tologin';
+                layer.close(index);
+            });
+        }
+        else
+        {
+            var sellerId=$('#seller').attr('value');
+            if(sellerId==userId)
+            {
+                layer.alert('您不能与自己聊天!');
+                return false;
+            }
+            self.location='toChat?sellerId='+sellerId;
+        }
+
+    }
+
+    function toComment(){
+        if(userNickname==null)
+        {
+            layer.confirm('请先登录！', {icon: 9, title:'提示'}, function(index){
+                //do something
+                self.location='tologin';
+                layer.close(index);
+            });
+        }
+        else
+        {
+            var cId=$('#commodity').attr('value');
+            //获取输入框中的内容
+            var content=$('.comment-send-input').val();
+            //判空
+            if(content==''||content==null)
+                return false;
+            //获取当前时间
+            var now=CurrentTime();
+            //清空输入框
+            $('.comment-send-input').val('');
+
+            //数据提交到后台
+            $.ajax({
+                url:'insertComment',
+                type:'post',
+                data:{
+                    userId,
+                    userNickname,
+                    userAvatar,
+                    commodityId:cId,
+                    commentContent:content,
+                    commentTime:now
+                },
+                dataType: 'json',
+                success :function (data){
+                    if(data.status == 1)
+                    {
+                        //页面渲染
+                        var htmlStr=$('#commentList').html();
+                        var dataStr='';
+                        if(htmlStr==null||htmlStr=='')
+                            dataStr=dataStr+'<div class="comment comment-bottom">\n';
+                        else
+                            dataStr=dataStr+'<div class="comment">\n';
+                        dataStr=dataStr+'<span class="comment-avatar">\n' +
+                                '                <img src="images/'+userAvatar+'" alt="avatar">\n' +
+                                '            </span>\n' +
+                    '                <div class="comment-content">\n' +
+                        '                    <p class="comment-content-name">'+userNickname+'</p>\n' +
+                        '                    <p class="comment-content-article">'+content+'</p>\n' +
+                        '                    <p class="comment-content-footer">\n' +
+                            '                        <span style="display: none" class="comment-content-footer-id">#2</span>\n' +
+                            '                        <span class="comment-content-footer-timestamp">'+now+'</span>\n' +
+                            '                        <a href="#" class="layui-icon-praise layui-icon" style="font-size: 12px;"><span></span></a>\n' +
+                            '                    </p>\n' +
+                        '                </div>\n' +
+                    '                <div class="cls"></div></div>';
+                        $('#commentList').html(dataStr+htmlStr);
+                    }
+                    else
+                        layer.msg("发布失败，请稍后重试!");
+                }
+            })
+        }
+    }
+
+    function cancelCol(){
+
+        $.ajax({
+            url:'cancelFavorite',
+            data:{
+                userId:userId,
+                commodityId:$('#commodity').attr('value')
+            },
+            dataType:'json',
+            success:function (data){
+                if(data.status==1)
+                {
+                    //页面渲染
+                    $("#favorite").toggle();//切换元素的可见状态
+                    $("#nfavorite").toggle();
+                }
+                else
+                    layer.alert("不好意思,出现了点错误,请稍后重试");
+            }
+        })
+    }
+
+    function toBuy(){
+        if(userNickname==null)
+        {
+            layer.confirm('请先登录！', {icon: 9, title:'提示'}, function(index){
+                //do something
+                self.location='tologin';
+                layer.close(index);
+            });
+        }
+        else
+        {
+            var commodityId=$('#commodity').attr('value');
+            $.ajax({
+                url:'doBuy',
+                data:{
+                    userId:userId,
+                    commodityId:commodityId
+                },
+                dataType:'json',
+                type: 'post',
+                success:function (data) {
+                    console.log(data.res);
+                    //支付宝支付
+                    // 添加之前先删除一下，如果单页面，页面不刷新，添加进去的内容会一直保留在页面中，二次调用form表单会出错
+                    let divForm = document.getElementsByTagName('divform')
+                    if (divForm.length) {
+                        console.log('divForm.length')
+                        /*document.body.removeChild(divForm[0])*/
+                        document.getElementsByTagName.innerHTML = ""; // 不清除会出错
+                    }
+                    const div=document.createElement('divform');
+                    div.innerHTML=data.res; // data就是接口返回的form 表单字符串
+                    document.body.appendChild(div);
+                    document.forms[0].setAttribute('target', '_blank') // 新开窗口跳转
+                    document.forms[0].submit();
+                }
+            })
+        }
+    }
+
+</script>
+<ul class="layui-nav" style="text-align: right;">
+    <li class="layui-nav-item" style="float: left">
+        <a href="toindex"><span>首页</span></a>
+    </li>
+    <li class="layui-nav-item">
+        <a href="javascript:toSell()"><span>发售物品</span></a>
+    </li>
+    <li class="layui-nav-item" id="theUser">
+        <a href="tologin"><span >登录</span></a>
+    </li>
+    <li class="layui-nav-item" id="theUser2">
+        <a href="toregister" >
+            <span>注册</span>
+        </a>
+    </li>
+</ul>
+<div style="height: 15%"></div>
+<div class="layui-container">
+<!--    设置一个隐藏域来存储卖家id-->
+    <div th:value="${theCommodity.sellerId}" id="seller" style="display: none"></div>
+    <div th:value="${theCommodity.commodityId}" id="commodity" style="display: none"></div>
+    <div class="layui-row layui-col-space20">
+        <div class="layui-col-md4 layui-col-md-offset1">
+            <img th:src="'images/'+${theCommodity.commodityPicture}" style="height: 400px;width: 300px">
+        </div>
+        <div class="layui-col-md6">
+            <div class="layui-form-item">
+                <label class="layui-form-label">描述&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</label>
+                <div class="layui-input-block">
+                    <h3 th:text="${theCommodity.commodityDesc}"></h3>
+                </div>
+            </div><br/><br/>
+            <div class="layui-form-item">
+                <label class="layui-form-label" >价格&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</label>
+                <div class="layui-input-block">
+                    <label class="layui-form-label"><h1 th:text="${theCommodity.commodityPrice}" style="color: red"></h1></label>
+                </div>
+            </div><br/><br/>
+            <div class="layui-form-item">
+                <label class="layui-form-label">损耗&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</label>
+                <div class="layui-input-block">
+                    <h2 th:if="${theCommodity.commodityLoss}=='0'">全新</h2>
+                    <h2 th:if="${theCommodity.commodityLoss}=='1'">几乎全新</h2>
+                    <h2 th:if="${theCommodity.commodityLoss}=='2'">轻微使用痕迹</h2>
+                    <h2 th:if="${theCommodity.commodityLoss}=='3'">明显使用痕迹</h2>
+                </div>
+            </div><br/><br/>
+            <div class="layui-form-item">
+                <label class="layui-form-label">卖家&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</label>
+                <div class="layui-input-block">
+                    <label class="layui-form-label"><h3 th:text="${theCommodity.sellerNickname}"></h3></label>
+                </div>
+            </div><br/><br/><br/>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <a id="nfavorite" href="javascript:cancelCol()" class="layui-btn layui-btn-primary layui-border-orange" style="display: none">取消收藏</a>
+                    <a id="favorite" href="javascript:collect()" class="layui-btn layui-btn-warm" >收藏</a>
+                    <a href="javascript:toChat()" class="layui-btn layui-btn-primary layui-border-red">联系卖家</a>
+                    <a href="javascript:toBuy()" class="layui-btn layui-btn-danger">立即购买</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="container">
+        <!-- 评论输入框 -->
+        <div class="comment-send">
+            <span class="comment-avatar">
+                <img id="userImg" src="images/default.jpg" alt="avatar">
+            </span>
+                <textarea class="comment-send-input" name="comment" cols="80" rows="5" placeholder="请自觉遵守互联网相关的政策法规，严禁发布色情、暴力、反动的言论。"></textarea>
+                <button class="comment-send-button" onclick="toComment()">发表评论</button>
+        </div>
+        <div class="comment-list" id="commentList">
+<!--            <div class="comment">-->
+<!--            <span class="comment-avatar">-->
+<!--                <img src="images/头像2.jpg" alt="avatar">-->
+<!--            </span>-->
+<!--                <div class="comment-content">-->
+<!--                    <p class="comment-content-name">EdmundDZhang</p>-->
+<!--                    <p class="comment-content-article">还有货吗?</p>-->
+<!--                    <p class="comment-content-footer">-->
+<!--                        <span style="display: none" class="comment-content-footer-id">#2</span>-->
+<!--                        <span class="comment-content-footer-timestamp">2018-01-20 14:05</span>-->
+<!--                        <a href="#" class="layui-icon-praise layui-icon" style="font-size: 12px;"><span>&nbsp164</span></a>-->
+<!--                    </p>-->
+<!--                </div>-->
+<!--                <div class="cls"></div>-->
+<!--            </div>-->
+<!--            <div class="comment comment-bottom">-->
+<!--               <span class="comment-avatar">-->
+<!--                   <img src="images/头像3.jpg" alt="avatar">-->
+<!--               </span>-->
+<!--                <div class="comment-content">-->
+<!--                    <p class="comment-content-name">小刚</p>-->
+<!--                    <p class="comment-content-article">Hello World!</p>-->
+<!--                    <p class="comment-content-footer">-->
+<!--                        <span style="display: none" class="comment-content-footer-id">#2</span>-->
+<!--                        <span class="comment-content-footer-timestamp">2018-01-20 14:05</span>-->
+<!--                        <a href="#" class="layui-icon-praise layui-icon" style="font-size: 12px;"><span>&nbsp164</span></a>-->
+<!--                    </p>-->
+<!--                </div>-->
+<!--                <div class="cls"></div>-->
+<!--            </div>-->
+        </div>
+    </div>
+    <div class="comment_add_or_last" >
+        没有更多评论了
+    </div>
+</div>
+
+</body>
+
+</html>
+
